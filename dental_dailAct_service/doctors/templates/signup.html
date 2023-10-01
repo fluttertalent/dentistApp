@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block scripts %}
+
+<script>
+  const radioSelectSection = document.getElementById('radio-select-section');
+  const userTypeSelect = document.getElementById('user-type-select');
+  
+  // Add an event listener to the user type select element
+  userTypeSelect.addEventListener('change', function() {
+    // Check if the selected user type is "Doctor"
+    if (this.value === 'doctor') {
+      // Hide the radio select section
+      radioSelectSection.style.display = 'none';
+    } else {
+      // Show the radio select section
+      radioSelectSection.style.display = 'block';
+    }
+  });
+</script>
+
+{% endblock %}
+
+{% block content %}
+
+
+
+<!-- Section: Design Block -->
+<section class="text-center">
+  <!-- Background image -->
+
+  <!-- Background image -->
+
+  <div class="card mx-4 mx-md-5 shadow-5-strong" style="       
+        background: hsla(0, 0%, 100%, 0.8);
+        backdrop-filter: blur(30px);
+        ">
+    <div class="card-body py-5 px-md-5">
+      <div class="row d-flex justify-content-center">
+        <div class="col-lg-8">
+          <h2 class="fw-bold mb-5">Sign up now</h2>
+          <form method="post">
+            <!-- 2 column grid layout with text inputs for the first and last names -->
+            {% csrf_token %}            
+            <div class="row">
+              <div class="col-md-6 mb-4">
+                <div class="form-outline">
+                  <input type="text" name="first_name" maxlength="30" required="" class="form-control" id="id_first_name">
+                  <label class="form-label" for="id_first_name">First name</label>
+                </div>
+              </div>
+              <div class="col-md-6 mb-4">
+                <div class="form-outline">
+                  <input type="text" name="last_name" maxlength="30" required="" id="id_last_name" class="form-control">
+                  <label class="form-label" for="id_last_name">Last name</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Email input -->
+            <div class="form-outline mb-4">
+              <input type="username" name="username" maxlength="320" required="" id="id_username" class="form-control">
+              <label class="form-label" for="id_username">Username</label>
+            </div>
+
+            <!-- Email input -->
+            <div class="form-outline mb-4">
+              <input type="email" name="email" maxlength="320" required="" id="id_email" class="form-control">
+              <label class="form-label" for="id_email">Email address</label>
+            </div>
+            
+            <div class="form-outline mb-4" >              
+              <label class="form-label" style="margin-left: 10px; margin-right: 50px;" for="id_gender">User Type</label>
+              <select class="form-select form-control" name="user_type" id="user-type-select">
+                <option value="patient">Patient</option>
+                <option value="doctor">Doctor</option>
+              </select>
+            </div>
+
+            <!-- Gender input -->
+            <div class="row">
+              <div class="col-md-6 mb-4">
+                <div class="form-outline">              
+                  <select class="form-select form-control" name="gender" id="id_gender">
+                    <option value="M">Male</option>
+                    <option value="F">Female</option>
+                    <option value="O">Other</option>
+                  </select>
+                  <label class="form-label" style="margin-left: 10px; margin-right: 50px;" for="id_gender">Gender</label>
+                </div>
+              </div>
+              <div class="col-md-6 mb-4">
+                <div class="form-outline">                  
+                  <input type="text" name="birthday" id="id_birthday" class="form-control">
+                  <label class="form-label" for="id_birthday">Birthday</label>
+                </div>
+              </div>  
+            </div>
+            
+            
+            <!-- Birthday input -->
+            <!-- <div class="form-outline form-inline mb-4">
+              <label class="form-label" for="id_birthday">Birthday</label>
+              <input type="text" name="birthday" id="id_birthday" class="form-control">
+            </div> -->
+       
+            <div class="form-outline mb-4" id="radio-select-section">
+              <div>
+                <label class="form-label">Did you already had or have someone of this oral diseases?</label>
+              </div>
+              <div class="form-outline mb-4 row">
+                <div class="form-check col-md-4 mb-4">
+                  <input class="form-check-input" type="radio" name="dental_disease" id="id_dental_caries_none" value="D" checked>
+                  <label class="form-check-label" for="id_dental_caries_none">
+                    Dental caries
+                  </label>
+                </div>
+                <div class="form-check col-md-4 mb-4">
+                  <input class="form-check-input" type="radio" name="dental_disease" id="id_dental_caries_mild" value="P">
+                  <label class="form-check-label" for="id_dental_caries_mild">
+                    Periodontitis
+                  </label>
+                </div>
+                <div class="form-check col-md-4 mb-4">
+                  <input class="form-check-input" type="radio" name="dental_disease" id="id_dental_caries_moderate" value="G">
+                  <label class="form-check-label" for="id_dental_caries_moderate">
+                    Gingivitis
+                  </label>
+                </div>
+              </div>             
+            </div>           
+      
+
+            <!-- Password input -->
+            <div class="form-outline mb-4">
+              <input type="password" name="password1" autocomplete="new-password" class="form-control" required="" id="id_password1">
+              <label class="form-label" for="id_password1">Password</label>
+            </div>
+            <!-- Password input -->
+            <div class="form-outline mb-4">
+              <input type="password" name="password2" autocomplete="new-password" required="" id="id_password2" class="form-control">
+              <label class="form-label" for="id_password2">Password confirmation</label>
+            </div>
+
+            <!-- Submit button -->
+            <button type="submit" class="btn btn-primary btn-block mb-4">
+              Sign up
+            </button>
+            <p>Already a member? <a href="{% url 'login' %}">Login</a></p>            
+          </form>
+          {% if form.errors %}
+            <div class="alert alert-danger">
+              {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                  <p>{{ field }}: {{ error }}</p>
+                {% endfor %}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+
+<!-- Section: Design Block -->
