@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+# from rest_framework.authtoken.models import Token
 from django.db import models
 
 
@@ -24,6 +25,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
     username = models.CharField(max_length=30, default='')
+    # token = models.OneToOneField(Token, on_delete=models.CASCADE)
+    
     GENDER_CHOICES = (
         ('M', 'Male'),
         ('F', 'Female'),
@@ -55,7 +58,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class Question(models.Model):
     text = models.CharField(max_length=255)
-    weight = models.IntegerField(max_length=20)
+    weight = models.IntegerField()
     kind = models.CharField(max_length=255)
     yes_no = models.BooleanField()
     options = models.JSONField(null=True)
@@ -71,4 +74,12 @@ class Answer(models.Model):
     
     def __str__(self):
         return 'Yes' if self.is_yes else 'No'
-    
+
+class Score(models.Model):
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    value = models.IntegerField()
+    pub_date = models.DateField()
+
+    def  __str__(self):
+        return self.value

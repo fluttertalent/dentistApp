@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.core.exceptions import ValidationError
-from doctors.models import User
+from doctors.models import User, Question
 
 class LoginForm(AuthenticationForm):
     username = forms.EmailField(label='Email address Or User name')
@@ -47,5 +47,22 @@ class SignUpForm(UserCreationForm):
         if password1 and password2 and password1 != password2:
             raise forms.ValidationError("The two password fields didn't match.")
         return password2
+
+class QuestionForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for question in Question.objects.all():
+            field_kwargs = {
+                'label': question.text,
+                'required': True,
+            }
+            if question.yes_no:
+                field = forms.ChoiceField(choices=(
+                    (question.weight, 'Yes'),
+                    (0, 'No'),
+                ), widget=forms.RadioSelect, **field_kwargs)
+            else:
+                field = forms.ChoiceField(choices=question.options.items(), widget=forms.RadioSelect, **field_kwargs)
+            self.fields[str(question.id)] = field
     
     

@@ -79,7 +79,7 @@
 <div class="container mt-5">
     {% block content %}{% endblock %}
 </div>
-
+<div id="toast"></div>
 <!-- Footer -->
 <footer class="text-center text-lg-start bg-light text-muted">
     <p>© 2023 Dentist Daily Health</p>
@@ -91,6 +91,7 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <script>
   $(document).ready(function() {
     $('#id_birthday').datepicker({
@@ -115,6 +116,26 @@
       radioSelectSection.style.visibility = 'visible';
     }
   });
+</script>
+<script>
+function showToast(message, type) {
+  toastr.options = {
+    closeButton: true,
+    progressBar: true,
+    positionClass: 'toast-top-right',
+    timeOut: 5000,
+  };
+
+  if (type === 'success') {
+    toastr.success(message);
+  } else if (type === 'error') {
+    toastr.error(message);
+  } else if (type === 'warning') {
+    toastr.warning(message);
+  } else {
+    toastr.info(message);
+  }
+}
 </script>
 
 </body>
