@@ -6,11 +6,16 @@
     <p>{{ message }}</p>
   </div>
 {% endif %}
+{% if tip %}
+  <div class="alert alert-danger" role="alert">
+    <strong>Tip!</strong>
+    <p>{{ tip }}</p>
+  </div>
+{% endif %}
 {% if not existing_answers %}    
  <form method="post">
   {% for kind, question_obj in questions_by_kind.items %} 
-    <h2>{{ kind }}</h2>
-    
+    <h2>{{ kind }}</h2>    
         {% csrf_token %}
         {% for question in question_obj %}
           <div class="card mb-4">

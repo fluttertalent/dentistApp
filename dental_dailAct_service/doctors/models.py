@@ -73,8 +73,8 @@ class Answer(models.Model):
     pub_date = models.DateField()
     
     def __str__(self):
-        return 'Yes' if self.is_yes else 'No'
-
+        return f"{self.user.username} - {self.question.text}: {self.value}"
+    
 class Score(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -82,4 +82,11 @@ class Score(models.Model):
     pub_date = models.DateField()
 
     def  __str__(self):
-        return self.value
+        return f"{self.user.username} - {self.pub_date}: {self.value}"
+    
+class Tip(models.Model):
+
+    text = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.text}"

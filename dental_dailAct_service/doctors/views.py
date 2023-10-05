@@ -13,9 +13,11 @@ from django.contrib import messages
 from django.contrib.auth import logout
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from .models import Question, Answer, Score
+from .models import Question, Answer, Score, Tip
 from datetime import date
 from django.core.paginator import Paginator
+import random
+
 
 @login_required(login_url='login')
 def home_view(request):
@@ -87,7 +89,7 @@ def question_list(request):
             scoreData.save()
 
             str = ""
-            if(score >= 0 and score <= 14):
+            if(score <= 14):
                 str = "Status is Low Risk."
             elif(score >=15 and score <= 28):
                 str = "Status is Moderate Risk."
@@ -95,11 +97,17 @@ def question_list(request):
                 str = "Status is High Risk."
 
             message = "Successfully Answered. Your Score is {score}.".format(score=score) + " " + str
+
+            tips = Tip.objects.all()
+            random_index = random.randint(0, len(tips) - 1)
+            random_tip = tips[random_index]
+
             context = {
                 'questions_by_kind': questions_by_kind,
                 'form': form,   
                 'existing_answers':1,
-                'message' : message
+                'message' : message,
+                'tip': random_tip
             }
             return render(request, 'question_list.html', context)
             # Redirect or perform further actions

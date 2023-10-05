@@ -11,8 +11,9 @@ import json
 # from rest_framework.decorators import api_view, authentication_classes, permission_classes
 # from rest_framework.permissions import IsAuthenticated
 # from rest_framework.authtoken.models import Token
-from doctors.models import Question, Answer
+from doctors.models import Question, Answer, Score, Tip
 from datetime import date
+import random
 
 
 @api_view(['POST'])
@@ -61,59 +62,34 @@ class QuestionList(generics.ListCreateAPIView):
 
 @api_view(['POST'])
 def save_answers(request):
+    score = 0
     for element in request.data:
         serializer = AnswerSerializer(data=element)  # Set many=True to indicate bulk data
         if serializer.is_valid():
             serializer.save()
+            score = score + int(element['value'])
+            print('scoring')        
         else:
             print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+    print(element['user'])
+    scoreData = Score(user_id=element['user'], value=score, pub_date=date.today())
+    scoreData.save()
+
+    tips = Tip.objects.all()
+    random_index = random.randint(0, len(tips) - 1)
+    random_tip = tips[random_index]
+    
+    str = ""
+    if(score <= 14):
+        str = "Status is Low Risk."
+    elif(score >=15 and score <= 28):
+        str = "Status is Moderate Risk."
+    else:
+        str = "Status is High Risk."
+
+    return Response({"title":"Successfully Answered!","content": "Your score is {score}.".format(score=score)+" "+str}, status=status.HTTP_201_CREATED)
     
 
-# def question_list(request):
-#     if request.method == 'GET':
-#         # Retrieve all questions
-#         question_list = Question.objects.all()
-#         # question_list = list(question_list.values())
-#         # print(question_list)
-#         # Create a dictionary of questions by kind
-#         questions_by_kind = {}
-#         for question in question_list:
-#             if question.kind not in questions_by_kind:
-#                 questions_by_kind[question.kind] = []
-#             questions_by_kind[question.kind].append(question)
 
-#         json_data = json.dumps({k: [q.text for q in v] for k, v in questions_by_kind.items()})        
-#         print(json_data)
-#         existing_answers = Answer.objects.filter(user_id=request.user.id, pub_date=date.today()).exists()
-#         message = ''
-#         if existing_answers:
-#             message = 'You have already answered the questions for today.'
-
-#         context = {
-#             'questions_by_kind': json_data,
-#             'existing_answers': existing_answers,
-#             'message': message
-#         }
-#         # print(questions_by_kind)
-#         return Response(context)
-
-    # elif request.method == 'POST':
-    #     form = QuestionForm(request.POST)
-    #     if form.is_valid():
-    #         for question_id, answer_value in form.cleaned_data.items():
-    #             answer = Answer(user_id=request.user.id if request.user.is_authenticated else None, question_id=question_id, value=answer_value, pub_date=date.today())
-    #             answer.save()
-    #             message = "Successfully Answered"
-    #             context = {
-    #                 'message': message
-    #             }
-    #             return Response(context)
-    #         # Redirect or perform further actions
-    #     else:
-    #         message = "Invalid post data"
-    #         context = {
-    #             'message': message
-    #         }
-    #         return Response(context)
