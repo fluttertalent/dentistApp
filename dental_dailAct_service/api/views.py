@@ -53,7 +53,7 @@ class QuestionList(generics.ListCreateAPIView):
         # Access request data
         query_params = request.query_params
         print(query_params)
-        existing_answers = Answer.objects.filter(user_id=query_params['user_id'], pub_date=date.today()).exists()
+        existing_answers = Answer.objects.filter(user_id=query_params['user_id'], pub_date=query_params['pub_date']).exists()
         if (existing_answers):
             return Response({'messsage':'You have already answered to daily questions'}, status=status.HTTP_404_NOT_FOUND)
         # Do something with the data        
@@ -68,12 +68,10 @@ def save_answers(request):
         if serializer.is_valid():
             serializer.save()
             score = score + int(element['value'])
-            print('scoring')        
         else:
             print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
-    print(element['user'])
     scoreData = Score(user_id=element['user'], value=score, pub_date=date.today())
     scoreData.save()
 
@@ -89,7 +87,7 @@ def save_answers(request):
     else:
         str = "Status is High Risk."
 
-    return Response({"title":"Successfully Answered!","content": "Your score is {score}.".format(score=score)+" "+str}, status=status.HTTP_201_CREATED)
+    return Response({"title":"Successfully Answered!","content": "Your score is {score}.".format(score=score)+" "+str, "tip":random_tip.text}, status=status.HTTP_201_CREATED)
     
 
 

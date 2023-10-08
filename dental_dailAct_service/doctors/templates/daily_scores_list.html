@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Daily Scores List</h1>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>User</th>
+        <th>Score</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for score in all_scores %}
+        {% if forloop.first or score.pub_date != prev_date %}
+          <tr>
+            <td>{{ score.pub_date }}</td>
+            <td>{{ score.user.username }}</td>
+            <td>{{ score.value }}</td>
+            <td>{{ score.status }}</td>
+          </tr> 
+        {% else %}
+          <tr>
+            <td></td>
+            <td>{{ score.user }}</td>
+            <td>{{ score.value }}</td>
+            <td>{{ score.status }}</td>
+          </tr>
+        {% endif %}
+        {% with score.pub_date as prev_date %}
+        {% endwith %}
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
+
+{% block styles %}
+  <style>
+    .table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th, td {
+      text-align: left;
+      padding: 8px;
+      border: 1px solid #ddd;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+  </style>
+{% endblock %}

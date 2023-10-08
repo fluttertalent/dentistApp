@@ -1,7 +1,8 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 # from rest_framework.authtoken.models import Token
 from django.db import models
-
+from django.urls import reverse
+from datetime import date
 
 # Create your models here.
 class UserManager(BaseUserManager):
@@ -38,6 +39,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         ('D', 'Dental caries'),
         ('P', 'Periodonitis'),
         ('G', 'Gingivitis'),
+        ('N', 'None')
     )
     dental_disease = models.CharField(max_length=100, choices=DENTAL_DISEASE_CHOICES)
     USER_TYPE_CHOICES = (
@@ -55,6 +57,15 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+    
+    # def get_absolute_url(self):
+    #     return reverse('patient_detail', args=[str(self.id)])
+
+    def get_daily_answers(self):
+        today = date.today()
+        answers = Answer.objects.filter(user=self.id, pub_date__lte=today).order_by('-pub_date')
+
+        return answers
 
 class Question(models.Model):
     text = models.CharField(max_length=255)

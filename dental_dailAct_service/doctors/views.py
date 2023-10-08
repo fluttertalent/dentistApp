@@ -13,10 +13,20 @@ from django.contrib import messages
 from django.contrib.auth import logout
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from .models import Question, Answer, Score, Tip
-from datetime import date
+from .models import Question, Answer, Score, Tip, User
+from datetime import date, timedelta
 from django.core.paginator import Paginator
 import random
+from django.contrib.auth.decorators import user_passes_test
+from django.views.decorators.csrf import csrf_exempt
+from django_datatables_view.base_datatable_view import BaseDatatableView
+from django.http import HttpResponseForbidden
+from django.shortcuts import get_object_or_404
+from django.views.generic import DetailView
+from django.core import serializers
+import numpy as np
+import json
+
 
 
 @login_required(login_url='login')
@@ -57,6 +67,34 @@ def signup(request):
         print('render')
         form = SignUpForm()
     return render(request, 'signup.html', {'form': form})
+
+
+
+class PatientsListJson(BaseDatatableView):
+    model = User
+    columns = ['id', 'first_name', 'last_name', 'email','gender', 'birthday', 'dental_disease']
+    order_columns = ['id', 'first_name', 'last_name', 'email','gender', 'birthday', 'dental_disease']
+    max_display_length = 100 
+
+    def get_initial_queryset(self):
+        return User.objects.filter(user_type='patient')
+
+@login_required
+def patients_list(request):
+    if request.user.user_type == 'doctor':
+        return render(request, 'patients_list.html')
+    else:
+        return HttpResponseForbidden()
+    
+
+class PatientDetailView(DetailView):
+    model = User
+    template_name = 'patient_detail.html'
+
+    def get_object(self):
+        return get_object_or_404(User, pk=self.kwargs['pk'])
+
+
 
 @login_required(login_url='login')
 def question_list(request):
@@ -133,4 +171,68 @@ def question_list(request):
     # Render the template with the paginated questions
     return render(request, 'question_list.html', context)
 
+@login_required(login_url='login')
+def daily_scores_list(request):
+    all_scores = Score.objects.all().order_by('user', '-pub_date')
+    for score in all_scores:
+        status = ''
+        if(score.value <= 14):
+            status = "Low Risk"
+        elif(score.value >=15 and score.value <= 28):
+            status = "Moderate Risk"
+        else:
+            status = "High Risk"
+        score.status = status        
 
+    context = {
+        'all_scores': all_scores,
+    }
+    return render(request, 'daily_scores_list.html', context)
+
+# def daily_scores_list(request):
+#     all_answers = Answer.objects.all().order_by('user', '-pub_date')
+#     all_answers_json = serializers.serialize('json', all_answers)
+#     return JsonResponse(all_answers_json, safe=False)
+
+def home_view(request):
+    # Get the total number of patients
+    total_patients = User.objects.filter(user_type='patient').count()
+
+    # Get the total number of answers
+    total_answers = Answer.objects.count()
+
+    # Get the average score of today scores of all patients
+    today = date.today()
+    today_scores = Score.objects.filter(pub_date=today)
+    today_scores_avg = np.mean([score.value for score in today_scores])
+
+    # Get the graph of every day's average of score values
+    scores = Score.objects.all().order_by('pub_date')
+    scores_dates = [score.pub_date for score in scores]
+    scores_values = [score.value for score in scores]
+    scores_avg = []
+    days = []
+    current_day = scores_dates[0]
+    current_sum = 0
+    count = 0
+    for i in range(len(scores_dates)):
+        if scores_dates[i] == current_day:
+            current_sum += scores_values[i]
+            count += 1
+        else:
+            scores_avg.append(current_sum / count)
+            days.append(current_day.strftime('%Y-%m-%d'))
+            current_day = scores_dates[i]
+            current_sum = scores_values[i]
+            count = 1
+    scores_avg.append(current_sum / count)
+    days.append(current_day.strftime('%Y-%m-%d'))
+
+    context = {
+        'total_patients': total_patients,
+        'total_answers': total_answers,
+        'today_scores_avg': today_scores_avg,
+        'scores_avg': json.dumps({'days': days, 'scores_avg': scores_avg})
+    }
+    
+    return render(request, 'home.html', context)

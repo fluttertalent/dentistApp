@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1>Patients List</h1>
+    <table id="patient-table" class="table table-striped table-bordered" style="width:100%">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Username</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Email Address</th>
+                <th>Gender</th>
+                <th>Birthday</th>
+                <th>Dental Disease</th>
+                <th></th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#patient-table').DataTable({
+            "processing": true,
+            "serverSide": true,
+            "ajax": "{% url 'patients_list_json' %}",
+            "columns": [
+                {"data": "id"},
+                {"data": "username"},
+                {"data": "first_name"},
+                {"data": "last_name"},
+                {"data": "email"},
+                {"data": "gender"},
+                {"data": "birthday"},
+                {"data": "dental_disease"},
+                {
+                    "data": null,
+                    "render": function(data, type, row) {
+                        return '<a href="/doctors/patient/' + row.id + '">View</a>';
+                    }
+                }
+            ]
+        });
+    });
+</script>
+{% endblock %}

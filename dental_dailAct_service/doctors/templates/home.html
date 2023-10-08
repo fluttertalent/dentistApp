@@ -1,10 +1,37 @@
-<!-- templates/home.html -->
-
 {% extends 'base.html' %}
 
-{% block title %}Home{% endblock %}
-
 {% block content %}
-    <h1>Welcome to My Django App</h1>
-    <p>This is the home page content.</p>
+  <h1>Dashboard</h1>
+  <p>Total number of patients: {{ total_patients }}</p>
+  <p>Total number of answers: {{ total_answers }}</p>
+  <p>Average score of today scores of all patients: {{ today_scores_avg }}</p>
+  <canvas id="scores-chart"></canvas>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const scoresData = JSON.parse('{{ scores_avg|safe }}');
+    const ctx = document.getElementById('scores-chart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: scoresData.days,
+        datasets: [{
+          label: 'Average Scores Over Time',
+          data: scoresData.scores_avg,
+          backgroundColor: 'rgba(255, 99, 132, 0.2)',
+          borderColor: 'rgba(255, 99, 132, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          yAxes: [{
+            ticks: {
+              beginAtZero: true
+            }
+          }]
+        }
+      }
+    });
+  </script>
 {% endblock %}
